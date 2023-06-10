@@ -1,5 +1,7 @@
 # Dependency directories
 node_modules/
-tests/samples
+tests/
 .vs
 build/
+assets/
+dist/**.map

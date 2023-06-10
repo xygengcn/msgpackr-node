@@ -1,12 +1,12 @@
 {
-  "name": "msgpackr",
+  "name": "msgpackr-node",
   "author": "Kris Zyp",
   "version": "1.9.5",
   "description": "Ultra-fast MessagePack implementation with extensions for records and structured cloning",
   "license": "MIT",
   "types": "./index.d.ts",
   "main": "./dist/node.cjs",
-  "module": "./index.js",
+  "module": "./dist/node.cjs",
   "keywords": [
     "MessagePack",
     "msgpack",
@@ -16,7 +16,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/kriszyp/msgpackr"
+    "url": "https://github.com/xygengcn/msgpackr-node"
   },
   "scripts": {
     "benchmark": "node ./tests/benchmark.cjs",
@@ -40,7 +40,7 @@
         "require": "./dist/node.cjs",
         "import": "./node-index.js"
       },
-      "default": "./index.js"
+      "default": "./dist/node.cjs"
     },
     "./pack": {
       "types": {
