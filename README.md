@@ -16,11 +16,11 @@ The msgpackr package is an extremely fast MessagePack NodeJS/JavaScript implemen
 Install with:
 
 ```
-npm i msgpackr
+npm i msgpackr-node
 ```
 And `import` or `require` it for basic standard serialization/encoding (`pack`) and deserialization/decoding (`unpack`) functions:
 ```js
-import { unpack, pack } from 'msgpackr';
+import { unpack, pack } from 'msgpackr-node';
 let serializedAsBuffer = pack(value);
 let data = unpack(serializedAsBuffer);
 ```
@@ -33,14 +33,14 @@ The msgpackr package runs on any modern JS platform, but is optimized for NodeJS
 We can use the including streaming functionality (which further improves performance). The `PackrStream` is a NodeJS transform stream that can be used to serialize objects to a binary stream (writing to network/socket, IPC, etc.), and the `UnpackrStream` can be used to deserialize objects from a binary sream (reading from network/socket, etc.):
 
 ```js
-import { PackrStream } from 'msgpackr';
+import { PackrStream } from 'msgpackr-node';
 let stream = new PackrStream();
 stream.write(myData);
 
 ```
 Or for a full example of sending and receiving data on a stream:
 ```js
-import { PackrStream, UnpackrStream } from 'msgpackr';
+import { PackrStream, UnpackrStream } from 'msgpackr-node';
 let sendingStream = new PackrStream();
 let receivingStream = new UnpackrStream();
 // we are just piping to our own stream, but normally you would send and
@@ -66,7 +66,7 @@ This is UMD based, and will register as a module if possible, or create a `msgpa
 
 For module-based development, it is recommended that you directly import the module of interest, to minimize dependencies that get pulled into your application:
 ```js
-import { unpack } from 'msgpackr/unpack' // if you only need to unpack
+import { unpack } from 'msgpackr-node/unpack' // if you only need to unpack
 ```
 
 The package also includes a minified bundle in index.min.js. 
@@ -96,7 +96,7 @@ If you prefer to use encoder/decode terminology, msgpackr exports aliases, so `d
 ## Record / Object Structures
 There is a critical difference between maps (or dictionaries) that hold an arbitrary set of keys and values (JavaScript `Map` is designed for these), and records or object structures that have a well-defined set of fields. Typical JS objects/records may have many instances re(use) the same structure. By using the record extension, this distinction is preserved in MessagePack and the encoding can reuse structures and not only provides better type preservation, but yield much more compact encodings and increase decoding performance by 2-3x. Msgpackr automatically generates record definitions that are reused and referenced by objects with the same structure. There are a number of ways to use this to our advantage. For large object structures with repeating nested objects with similar structures, simply serializing with the record extension can yield significant benefits. To use the record structures extension, we create a new `Packr` instance. By default a new `Packr` instance will have the record extension enabled:
 ```js
-import { Packr } from 'msgpackr';
+import { Packr } from 'msgpackr-node';
 let packr = new Packr();
 packr.pack(bigDataWithLotsOfObjects);
 
@@ -111,14 +111,14 @@ Streaming with record structures works by encoding a structure the first time it
 ### Shared Record Structures
 Another useful way of using msgpackr, and the record extension, is for storing data in a databases, files, or other storage systems. If a number of objects with common data structures are being stored, a shared structure can be used to greatly improve data storage and deserialization efficiency. In the simplest form, provide a `structures` array, which is updated if any new object structure is encountered:
 ```js
-import { Packr } from 'msgpackr';
+import { Packr } from 'msgpackr-node';
 let packr = new Packr({
 	structures: [... structures that were last generated ...]
 });
 ```
 If you are working with persisted data, you will need to persist the `structures` data when it is updated. Msgpackr provides an API for loading and saving the `structures` on demand (which is robust and can be used in multiple-process situations where other processes may be updating this same `structures` array), we just need to provide a way to store the generated shared structure so it is available to deserialize stored data in the future:
 ```js
-import { Packr } from 'msgpackr';
+import { Packr } from 'msgpackr-node';
 let packr = new Packr({
 	getStructures() {
 		// storing our data in file (but we could also store in a db or key-value store)
@@ -193,7 +193,7 @@ The following options properties can be provided to the Packr or Unpackr constru
 ### 32-bit Float Options
 By default all non-integer numbers are serialized as 64-bit float (double). This is fast, and ensures maximum precision. However, often real-world data doesn't not need 64-bits of precision, and using 32-bit encoding can be much more space efficient. There are several options that provide more efficient encodings. Using the decimal rounding options for encoding and decoding provides lossless storage of common decimal representations like 7.99, in more efficient 32-bit format (rather than 64-bit). The `useFloat32` property has several possible options, available from the module as constants:
 ```js
-import { FLOAT32_OPTIONS } from 'msgpackr';
+import { FLOAT32_OPTIONS } from 'msgpackr-node';
 const { ALWAYS, DECIMAL_ROUND, DECIMAL_FIT } = FLOAT32_OPTIONS;
 ```
 
@@ -209,7 +209,7 @@ In addition, msgpackr exports a `roundFloat32(number)` function that can be used
 ### Native Acceleration
 Msgpackr employs an optional native node-addon to accelerate the parsing of strings. This should be automatically installed and utilized on NodeJS. However, you can verify this by checking the `isNativeAccelerationEnabled` property that is exported from msgpackr. If this is `false`, the `msgpackr-extract` package may not have been properly installed, and you may want to verify that it is installed correctly:
 ```js
-import { isNativeAccelerationEnabled } from 'msgpackr'
+import { isNativeAccelerationEnabled } from 'msgpackr-node'
 if (!isNativeAccelerationEnabled)
 	console.warn('Native acceleration not enabled, verify that install finished properly')
 ```
@@ -258,7 +258,7 @@ See the [benchmark.md](benchmark.md) for more benchmarks and information about b
 ## Custom Extensions
 You can add your own custom extensions, which can be used to encode specific types/classes in certain ways. This is done by using the `addExtension` function, and specifying the class, extension `type` code (should be a number from 1-100, reserving negatives for MessagePack, 101-127 for msgpackr), and your `pack` and `unpack` functions (or just the one you need).
 ```js
-import { addExtension, Packr } from 'msgpackr';
+import { addExtension, Packr } from 'msgpackr-node';
 
 class MyCustomClass {...}
 
@@ -281,7 +281,7 @@ addExtension({
 If you want to use msgpackr to encode and decode the data within your extensions, you can use the `read` and `write` functions and read and write data/objects that will be encoded and decoded by msgpackr, which can be easier and faster than creating and receiving separate buffers:
 
 ```js
-import { addExtension, Packr } from 'msgpackr';
+import { addExtension, Packr } from 'msgpackr-node';
 
 class MyCustomClass {...}
 
